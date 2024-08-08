@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from quart import Quart, jsonify, request, render_template_string, Response, render_template
+from quart import Quart, jsonify, request, Response, render_template
 from telethon import TelegramClient, events
 import asyncio
 from dotenv import load_dotenv

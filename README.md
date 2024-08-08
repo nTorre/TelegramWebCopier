@@ -41,3 +41,4 @@ USE THIS PROGRAM ONLY LOCALLY!!
 - reference between messages
 - better info on forwarded message (name or other infos)
 - save rules in file
+- find in list

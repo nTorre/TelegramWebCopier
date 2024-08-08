@@ -83,28 +83,28 @@
 
 <script>
 
-    let dom_source_list = document.getElementById("dialogs_source_list");
-    let dom_destination_list = document.getElementById("dialogs_destination_list");
+    let domSourceList = document.getElementById("dialogs_source_list");
+    let domDestinationList = document.getElementById("dialogs_destination_list");
 
-    let source_selection = "";
-    let destination_selection = "";
-    let source_topic = "";
+    let sourceSelection = "";
+    let destinationSelection = "";
+    let sourceTopic = "";
 
-    let dialog_list = [];
+    let dialogList = [];
 
     fetch('/api/v0/dialog_list')
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
-            dialog_list = data;
+            dialogList = data;
             data.forEach((item, index)=>{
-                dom_source_list.innerHTML+= `
+                domSourceList.innerHTML+= `
                     <div class="chat-container" onclick=sourceClicked(${item.id}) id=s${item.id}>
                         <p class="title">${item.name}</p>
                         <p class="last_message">${item.last_message === "" ? "Media" : item.last_message}</p>
                     </div>`
 
-                dom_destination_list.innerHTML+= `
+                domDestinationList.innerHTML+= `
                     <div class="chat-container" onclick=destinationClicked(${item.id}) id=d${item.id}>
                         <p class="title">${item.name}</p>
                         <p class="last_message">${item.last_message === "" ? "Media" : item.last_message}</p>
@@ -121,19 +121,19 @@
         clearTopic();
         let chat = document.getElementById("s" + id);
 
-        if (source_selection === id) {
+        if (sourceSelection === id) {
             // elemento selezionato, lo deseleziono (toggle)
-            source_selection = "";
+            sourceSelection = "";
             chat.style.background="transparent";
-        } else if (source_selection === "") {
+        } else if (sourceSelection === "") {
             // primo elemento ad essere selezinato
-            source_selection = id;
+            sourceSelection = id;
             chat.style.background="rgba(0,68,244,0.5)"
         } else {
             // ho selezionato un elemento vecchio e lo deseleziono, mentre seleziono quello nuovo
-            let old_chat = document.getElementById("s" + source_selection);
-            old_chat.style.background="transparent";
-            source_selection = id;
+            let oldChat = document.getElementById("s" + sourceSelection);
+            oldChat.style.background="transparent";
+            sourceSelection = id;
             chat.style.background="rgba(0,68,244,0.5)"
         }
 
@@ -144,25 +144,25 @@
     function clearTopic(){
         document.getElementById("topic_source_list").innerHTML = ""
         document.getElementById("topic_container").classList.add("invisible");
-        source_topic = "";
+        sourceTopic = "";
     }
 
     function destinationClicked(id){
         let chat = document.getElementById("d" + id);
 
-        if (destination_selection === id) {
+        if (destinationSelection === id) {
             // elemento selezionato, lo deseleziono (toggle)
-            destination_selection = "";
+            destinationSelection = "";
             chat.style.background="transparent";
-        } else if (destination_selection === "") {
+        } else if (destinationSelection === "") {
             // primo elemento ad essere selezinato
-            destination_selection = id;
+            destinationSelection = id;
             chat.style.background="rgba(0,68,244,0.5)"
         } else {
             // ho selezionato un elemento vecchio e lo deseleziono, mentre seleziono quello nuovo
-            let old_chat = document.getElementById("d" + destination_selection);
+            let old_chat = document.getElementById("d" + destinationSelection);
             old_chat.style.background="transparent";
-            destination_selection = id;
+            destinationSelection = id;
             chat.style.background="rgba(0,68,244,0.5)"
         }
 
@@ -170,22 +170,22 @@
     }
 
     function checkRule(){
-        let new_rule_button = document.getElementById("new_rule_button")
+        let newRuleButton = document.getElementById("new_rule_button")
 
-        if (source_selection !== "" && destination_selection !== ""){
+        if (sourceSelection !== "" && destinationSelection !== ""){
             // possible new rule
-            new_rule_button.classList.remove("disabled")
+            newRuleButton.classList.remove("disabled")
         } else {
-            new_rule_button.classList.add("disabled")
+            newRuleButton.classList.add("disabled")
         }
     }
 
     function checkTopic(){
-        if (source_selection === ""){
+        if (sourceSelection === ""){
             return
         }
 
-        fetch(`/api/v0/get_topic/${source_selection}`)
+        fetch(`/api/v0/get_topic/${sourceSelection}`)
         .then((response) => response.json())
         .then((data) => {
             console.log(data)
@@ -193,9 +193,9 @@
                 // ha topic, mostriamoli
                 console.log(data.topics)
                 document.getElementById("topic_container").classList.remove("invisible");
-                let topic_list = document.getElementById("topic_source_list");
+                let topicList = document.getElementById("topic_source_list");
                 data.topics.forEach((item, key)=>{
-                    topic_list.innerHTML+=`<p style="cursor: pointer" onclick=topicClicked(${item.id}) id=${item.id}>${item.title} (${item.id})</p>`
+                    topicList.innerHTML+=`<p style="cursor: pointer" onclick=topicClicked(${item.id}) id=${item.id}>${item.title} (${item.id})</p>`
                 })
             }
 
@@ -206,24 +206,24 @@
     function topicClicked(id){
         document.getElementById(id).style.background = "rgba(0,68,244,0.5)"
 
-        if (source_topic !== ""){
-            document.getElementById(source_topic).style.background = "transparent"
+        if (sourceTopic !== ""){
+            document.getElementById(sourceTopic).style.background = "transparent"
         }
-        source_topic = id
+        sourceTopic = id
     }
 
     function addRule(){
-        if (source_selection !== "" && destination_selection !== ""){
+        if (sourceSelection !== "" && destinationSelection !== ""){
 
-            if (source_topic === ""){
+            if (sourceTopic === ""){
                 fetch('api/v0/start_forward', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        source_id: source_selection,
-                        destination_id: destination_selection
+                        source_id: sourceSelection,
+                        destination_id: destinationSelection
                     }),
                 })
                 .then(response => response.json())
@@ -236,9 +236,9 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        source_id: source_selection,
-                        destination_id: destination_selection,
-                        topic_id: source_topic
+                        source_id: sourceSelection,
+                        destination_id: destinationSelection,
+                        topic_id: sourceTopic
                     }),
                 })
                 .then(response => response.json())
@@ -249,7 +249,7 @@
         }
 
     }
-    
+
     function getRules(){
 
         fetch(`/api/v0/list_rules`)
@@ -258,26 +258,26 @@
             let ruleList = document.getElementById("rule_list");
             ruleList.innerHTML = "";
             data.forEach((item)=>{
-                let destination_name = "";
-                let source_name = "";
+                let destinationName = "";
+                let sourceName = "";
                 console.log(item);
                 console.log(item.destination_id)
-                dialog_list.forEach((dialog) =>{
+                dialogList.forEach((dialog) =>{
                     if (dialog.id === item.destination_id){
                         console.log(dialog.name)
-                        destination_name = dialog.name;
+                        destinationName = dialog.name;
                     }
                     if (dialog.id === item.source_id){
-                        source_name = dialog.name;
+                        sourceName = dialog.name;
                     }
                 });
 
 
                 if (item.hasOwnProperty("topic_id")){
-                    ruleList.innerHTML += `<p>${source_name} (${item.topic_id}) -> ${destination_name}<button onclick="removeRule(${item.source_id}, ${item.destination_id}, ${item.topic_id})">Delete</button></p>`
+                    ruleList.innerHTML += `<p>${sourceName} (${item.topic_id}) -> ${destinationName}<button onclick="removeRule(${item.source_id}, ${item.destination_id}, ${item.topic_id})">Delete</button></p>`
 
                 } else {
-                    ruleList.innerHTML += `<p>${source_name} -> ${destination_name}<button onclick="removeRule(${item.source_id}, ${item.destination_id})">Delete</button></p>`
+                    ruleList.innerHTML += `<p>${sourceName} -> ${destinationName}<button onclick="removeRule(${item.source_id}, ${item.destination_id})">Delete</button></p>`
                 }
             })
 
