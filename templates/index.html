@@ -72,8 +72,8 @@
             <div style="width: 40px"></div>
         <div>
             <h3>Rules</h3>
+            <button id="new_rule_button" onclick="addRule()" class="disabled">Add rule</button>
             <div id="rule_list"></div>
-            <button id="new_rule_button" onclick="add_rule()" class="disabled">Add rule</button>
         </div>
     </div>
 
@@ -90,29 +90,35 @@
     let destination_selection = "";
     let source_topic = "";
 
+    let dialog_list = [];
+
     fetch('/api/v0/dialog_list')
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
+            dialog_list = data;
             data.forEach((item, index)=>{
                 dom_source_list.innerHTML+= `
-                    <div class="chat-container" onclick=source_clicked(${item.id}) id=s${item.id}>
+                    <div class="chat-container" onclick=sourceClicked(${item.id}) id=s${item.id}>
                         <p class="title">${item.name}</p>
                         <p class="last_message">${item.last_message === "" ? "Media" : item.last_message}</p>
                     </div>`
 
                 dom_destination_list.innerHTML+= `
-                    <div class="chat-container" onclick=destination_clicked(${item.id}) id=d${item.id}>
+                    <div class="chat-container" onclick=destinationClicked(${item.id}) id=d${item.id}>
                         <p class="title">${item.name}</p>
                         <p class="last_message">${item.last_message === "" ? "Media" : item.last_message}</p>
                     </div>`
 
 
             });
+
+            getRules();
+
         });
 
-    function source_clicked(id){
-        clear_topic();
+    function sourceClicked(id){
+        clearTopic();
         let chat = document.getElementById("s" + id);
 
         if (source_selection === id) {
@@ -131,17 +137,17 @@
             chat.style.background="rgba(0,68,244,0.5)"
         }
 
-        check_rule();
-        check_topic();
+        checkRule();
+        checkTopic();
     }
 
-    function clear_topic(){
+    function clearTopic(){
         document.getElementById("topic_source_list").innerHTML = ""
         document.getElementById("topic_container").classList.add("invisible");
         source_topic = "";
     }
 
-    function destination_clicked(id){
+    function destinationClicked(id){
         let chat = document.getElementById("d" + id);
 
         if (destination_selection === id) {
@@ -160,10 +166,10 @@
             chat.style.background="rgba(0,68,244,0.5)"
         }
 
-        check_rule();
+        checkRule();
     }
 
-    function check_rule(){
+    function checkRule(){
         let new_rule_button = document.getElementById("new_rule_button")
 
         if (source_selection !== "" && destination_selection !== ""){
@@ -174,7 +180,7 @@
         }
     }
 
-    function check_topic(){
+    function checkTopic(){
         if (source_selection === ""){
             return
         }
@@ -189,7 +195,7 @@
                 document.getElementById("topic_container").classList.remove("invisible");
                 let topic_list = document.getElementById("topic_source_list");
                 data.topics.forEach((item, key)=>{
-                    topic_list.innerHTML+=`<p style="cursor: pointer" onclick=topic_clicked(${item.id}) id=${item.id}>${item.title}</p>`
+                    topic_list.innerHTML+=`<p style="cursor: pointer" onclick=topicClicked(${item.id}) id=${item.id}>${item.title} (${item.id})</p>`
                 })
             }
 
@@ -197,7 +203,7 @@
         });
     }
 
-    function topic_clicked(id){
+    function topicClicked(id){
         document.getElementById(id).style.background = "rgba(0,68,244,0.5)"
 
         if (source_topic !== ""){
@@ -206,7 +212,7 @@
         source_topic = id
     }
 
-    function add_rule(){
+    function addRule(){
         if (source_selection !== "" && destination_selection !== ""){
 
             if (source_topic === ""){
@@ -221,7 +227,7 @@
                     }),
                 })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {console.log(data); getRules();})
                 .catch((error) => console.error('Error:', error));
             } else {
                 fetch('api/v0/start_topic_forward', {
@@ -236,11 +242,65 @@
                     }),
                 })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {console.log(data); getRules();})
                 .catch((error) => console.error('Error:', error));
             }
 
         }
+
+    }
+    
+    function getRules(){
+
+        fetch(`/api/v0/list_rules`)
+        .then((response) => response.json())
+        .then((data) => {
+            let ruleList = document.getElementById("rule_list");
+            ruleList.innerHTML = "";
+            data.forEach((item)=>{
+                let destination_name = "";
+                let source_name = "";
+                console.log(item);
+                console.log(item.destination_id)
+                dialog_list.forEach((dialog) =>{
+                    if (dialog.id === item.destination_id){
+                        console.log(dialog.name)
+                        destination_name = dialog.name;
+                    }
+                    if (dialog.id === item.source_id){
+                        source_name = dialog.name;
+                    }
+                });
+
+
+                if (item.hasOwnProperty("topic_id")){
+                    ruleList.innerHTML += `<p>${source_name} (${item.topic_id}) -> ${destination_name}<button onclick="removeRule(${item.source_id}, ${item.destination_id}, ${item.topic_id})">Delete</button></p>`
+
+                } else {
+                    ruleList.innerHTML += `<p>${source_name} -> ${destination_name}<button onclick="removeRule(${item.source_id}, ${item.destination_id})">Delete</button></p>`
+                }
+            })
+
+        });
+    }
+
+    function removeRule(source_id, destination_id, topic_id=""){
+        fetch('api/v0/stop_forward', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                source_id: source_id,
+                destination_id: destination_id,
+                topic_id: topic_id
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {console.log(data); getRules();})
+        .catch((error) => console.error('Error:', error));
+
+
     }
 
 </script>

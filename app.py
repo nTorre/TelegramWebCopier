@@ -176,7 +176,7 @@ async def start_topic_forward():
     return jsonify({"message": f"Inoltro avviato da {source_id} (topic {topic_id}) a {destination_id}"})
 
 
-@app.route('/stop_forward', methods=['POST'])
+@app.route('/api/v0/stop_forward', methods=['POST'])
 async def stop_forward():
     data = await request.json
     source_id = int(data['source_id'])
@@ -195,9 +195,12 @@ async def stop_forward():
         return jsonify({"message": "Nessun inoltro attivo trovato con questi parametri"}), 404
 
 
-@app.route('/list_forwards', methods=['GET'])
+@app.route('/api/v0/list_rules', methods=['GET'])
 async def list_forwards():
-    return jsonify(active_forwards)
+    to_ret = []
+    for key, values in active_forwards.items():
+        to_ret.append(values)
+    return jsonify(to_ret)
 
 
 @app.route('/')

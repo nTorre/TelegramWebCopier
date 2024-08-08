@@ -38,6 +38,5 @@ USE THIS PROGRAM ONLY LOCALLY!!
 ## TODOs
 
 - support topic also as destination
-- print the existing bindings
 - reference between messages
 - better info on forwarded message (name or other infos)
