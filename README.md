@@ -40,3 +40,4 @@ USE THIS PROGRAM ONLY LOCALLY!!
 - support topic also as destination
 - reference between messages
 - better info on forwarded message (name or other infos)
+- save rules in file

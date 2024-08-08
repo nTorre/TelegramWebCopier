@@ -126,12 +126,16 @@ async def list_chats():
             else:
                 last_message = ""
 
+            if dialog.date is None:
+                date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            else:
+                date = dialog.date.strftime("%m/%d/%Y, %H:%M:%S")
 
             chat_list.append({
                 'name': dialog.name,
                 'id': dialog.id,
                 'last_message': last_message,
-                'date': dialog.date.strftime("%m/%d/%Y, %H:%M:%S")
+                'date': date
             })
 
             chat_list.sort(key=convert_to_datetime, reverse=True)
